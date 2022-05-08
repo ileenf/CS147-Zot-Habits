@@ -3,6 +3,7 @@
 
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
+const int motionSensor = GPIO_NUM_13;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -11,10 +12,19 @@ long duration;
 float distanceCm;
 float distanceInch;
 
+
+void IRAM_ATTR detectsMovement(){
+  Serial.println("MOTION DETECTED!!!");
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  
+  pinMode(motionSensor, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
+  
 }
 
 void loop() {
@@ -29,4 +39,6 @@ void loop() {
   distanceInch = distanceCm * CM_TO_INCH;
 
   delay(1000);
+
+  
 }
