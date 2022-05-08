@@ -4,6 +4,7 @@
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
 const int motionSensor = GPIO_NUM_13;
+const int photoResistorPin = GPIO_NUM_12;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -38,7 +39,8 @@ void loop() {
   distanceCm = duration * SOUND_SPEED/2;
   distanceInch = distanceCm * CM_TO_INCH;
 
-  delay(1000);
+  int currLightVal = analogRead(photoResistorPin);
+  Serial.print(currLightVal);
 
-  
+  delay(1000);
 }
