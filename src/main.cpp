@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Wire.h>
 
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
