@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "DHT20.h"
-#include <HttpClient.h>
+
 #include "wifiConnect.hpp"
 
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
 const int motionSensor = GPIO_NUM_13;
-const int photoResistorPin = GPIO_NUM_12;
+const int photoResistorPin = GPIO_NUM_32;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -72,5 +72,8 @@ void loop() {
   int currLightVal = analogRead(photoResistorPin);
   Serial.print(currLightVal);
 
+  // HTTP Requests
   delay(1000);
+  httpRequest("worldtimeapi.org", "/api/timezone/Europe/London.txt");
+  
 }
