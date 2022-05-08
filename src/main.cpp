@@ -57,7 +57,10 @@ void loop() {
   distanceInch = distanceCm * CM_TO_INCH;
 
   int currLightVal = analogRead(photoResistorPin);
-  // Serial.print(currLightVal);
+  Serial.print(currLightVal);
 
+  // HTTP Requests
   delay(1000);
+  httpRequest("worldtimeapi.org", "/api/timezone/Europe/London.txt");
+  
 }

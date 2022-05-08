@@ -4,8 +4,6 @@
 // WiFi information
 char ssid[] = "Moto G (4) 7314";    
 char pass[] = "93f5b38274e5"; 
-const int kNetworkTimeout = 30*1000;
-const int kNetworkDelay = 1000;
 
 // AWS server information
 const char kHostname[] = "13.52.98.79";
@@ -16,6 +14,11 @@ const char username[] = "ubuntu";
 // weather API information
 const char apiHostname[] = "api.open-meteo.com";
 const char apiPath[] = "/v1/forecast?latitude=33.6405&longitude=117.8443&temperature_unit=fahrenheit&current_weather=true&daily=sunrise,sunset&timezone=America%2FLos_Angeles";
+
+// Number of milliseconds to wait without receiving any data before we give up
+const int kNetworkTimeout = 30*1000;
+// Number of milliseconds to wait if no data is available before trying again
+const int kNetworkDelay = 1000;
 
 void initializeWifi(){
   
@@ -38,15 +41,16 @@ void initializeWifi(){
 }
 
 void getWeatherData() {
+    httpRequest(apiHostname, apiPath);
+}
+
+void httpRequest(const char* hostname,  const char* path){
     int err =0;
   
     WiFiClient c;
     HttpClient http(c);
-    
-    err = http.get(apiHostname, apiPath);
-    Serial.println("this is the start of response");
-    Serial.println(err);
-    Serial.println("this is the end of response");
+
+    err = http.get(hostname, path);
     if (err == 0)
     {
         Serial.println("startedRequest ok");
