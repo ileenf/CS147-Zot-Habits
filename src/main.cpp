@@ -1,13 +1,12 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "DHT20.h"
-#include <HttpClient.h>
 #include "wifiConnect.hpp"
 
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
 const int motionSensor = GPIO_NUM_13;
-const int photoResistorPin = GPIO_NUM_12;
+const int photoResistorPin = GPIO_NUM_32;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -19,21 +18,8 @@ float distanceInch;
 // initialize temp/humidity sensor
 DHT20 DHT;
 
-// WiFi information
-char ssid[] = "Moto G (4) 7314";    
-char pass[] = "93f5b38274e5"; 
-
-// AWS server information
-const char kHostname[] = "13.52.98.79";
-int port = 5000;
-const char kPath[] = "/?var=10";
-const char username[] = "ubuntu";
-
-// weather API information
-
-
 void IRAM_ATTR detectsMovement(){
-  Serial.println("MOTION DETECTED!!!");
+  // Serial.println("MOTION DETECTED!!!");
 }
 
 void setup() {
@@ -55,7 +41,8 @@ void setup() {
   Serial.println();
   Serial.println();
 
-  initializeWifi(ssid, pass);
+  initializeWifi();
+  getWeatherData();
 }
 
 void loop() {
@@ -70,7 +57,7 @@ void loop() {
   distanceInch = distanceCm * CM_TO_INCH;
 
   int currLightVal = analogRead(photoResistorPin);
-  Serial.print(currLightVal);
+  // Serial.print(currLightVal);
 
   delay(1000);
 }

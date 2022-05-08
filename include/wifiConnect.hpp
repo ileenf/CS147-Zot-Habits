@@ -3,7 +3,8 @@
 
 #include <WiFi.h>
 
-void initializeWifi(const char* ssid, const char* pass);
+void initializeWifi();
+void getWeatherData();
 
 #endif
 
