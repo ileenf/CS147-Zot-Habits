@@ -13,7 +13,7 @@ const char username[] = "ubuntu";
 
 // weather API information
 const char apiHostname[] = "api.open-meteo.com";
-const char apiPath[] = "/v1/forecast?latitude=33.6405&longitude=117.8443&temperature_unit=fahrenheit&current_weather=true&daily=sunrise,sunset&timezone=America%2FLos_Angeles";
+const char apiPath[] = "/v1/forecast?latitude=33.6405&longitude=-117.8443&temperature_unit=fahrenheit&current_weather=true&daily=sunrise,sunset&timezone=America%2FLos_Angeles";
 
 // Number of milliseconds to wait without receiving any data before we give up
 const int kNetworkTimeout = 30*1000;
