@@ -8,8 +8,11 @@ void Distance::initializeDistanceThreshold(float threshold) {
     distanceThreshold = threshold;
 }
 
-void Distance::setDistanceInch() {
-    long duration = pulseIn(echoPin, HIGH);
+float Distance::getDistanceThreshold() {
+    return distanceThreshold;
+}
+
+void Distance::setDistanceInch(long duration) {
     float distanceCm = duration * SOUND_SPEED/2;
     distanceInch = distanceCm * CM_TO_INCH;
 }

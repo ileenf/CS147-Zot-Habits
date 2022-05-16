@@ -7,12 +7,13 @@
 class Distance {
     public:
         Distance(const int trigPin, const int echoPin);
-        void setDistanceInch();
+        void setDistanceInch(long duration);
         float getDistanceInch() const;
         bool distanceGreaterThanThreshold();
+        void initializeDistanceThreshold(float threshold);
+        float getDistanceThreshold();
 
     private:
-        void initializeDistanceThreshold(float threshold);
         float distanceThreshold;
         float distanceInch;
         float SOUND_SPEED = 0.034;

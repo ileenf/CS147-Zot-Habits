@@ -3,10 +3,12 @@
 #include "DHT20.h"
 #include "TempSensor.hpp"
 #include "wifiConnect.hpp"
+#include "Motion.hpp"
+#include "Distance.hpp"
 
 const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
-const int motionSensor = GPIO_NUM_13;
+const int motionSensorPin = GPIO_NUM_13;
 const int photoResistorPin = GPIO_NUM_32;
 
 #define SOUND_SPEED 0.034
@@ -19,8 +21,24 @@ float distanceInch;
 // initialize temp/humidity sensor
 TempSensor tempSensor{75}; 
 
+// initialize distance sensor
+Distance distanceSensor{trigPin, echoPin};
+
 void IRAM_ATTR detectsMovement(){
-  // Serial.println("MOTION DETECTED!!!");
+  Serial.println("MOTION DETECTED!!!");
+}
+
+float getCurrentDistance() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distanceSensor.setDistanceInch(duration);
+  float distanceInch = distanceSensor.getDistanceInch();
+  return distanceInch;
 }
 
 void setup() {
@@ -30,19 +48,23 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
+  // intialize distance threshold (distance from sitting down position)
+  delay(10000);
+  float threshold = getCurrentDistance();
+  distanceSensor.initializeDistanceThreshold(threshold);
+  delay(1000);
+
   // motion sensor
-  pinMode(motionSensor, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
+  pinMode(motionSensorPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(motionSensorPin), detectsMovement, RISING);
   
- 
 
   // Connect to WiFi network
   delay(1000);
   Serial.println();
   Serial.println();
 
-  initializeWifi();
-  getWeatherData();
+  // initializeWifi();
 }
 
 void loop() {
@@ -54,9 +76,7 @@ void loop() {
   digitalWrite(trigPin, LOW);
 
   // distance sensor -- measure time it takes for signal to return 
-  duration = pulseIn(echoPin, HIGH);
-  distanceCm = duration * SOUND_SPEED/2;
-  distanceInch = distanceCm * CM_TO_INCH;
+  float distance = getCurrentDistance();
 
   // light sensor 
   int currLightVal = analogRead(photoResistorPin);
