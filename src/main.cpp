@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "DHT20.h"
-
+#include "TempSensor.hpp"
 #include "wifiConnect.hpp"
 
 const int trigPin = GPIO_NUM_25;
@@ -17,7 +17,7 @@ float distanceCm;
 float distanceInch;
 
 // initialize temp/humidity sensor
-DHT20 DHT;
+TempSensor tempSensor; 
 
 // WiFi information
 char ssid[] = "Moto G (4) 7314";    
@@ -47,8 +47,8 @@ void setup() {
   pinMode(motionSensor, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
   
-  // temp/humidity sensor
-  DHT.begin();
+  // initialize tempSensor with preferred indoor temp
+  tempSensor = TempSensor(75);
 
   // Connect to WiFi network
   delay(1000);
@@ -59,16 +59,19 @@ void setup() {
 }
 
 void loop() {
+  // distance sensor -- emit signal 
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
+  // distance sensor -- measure time it takes for signal to return 
   duration = pulseIn(echoPin, HIGH);
   distanceCm = duration * SOUND_SPEED/2;
   distanceInch = distanceCm * CM_TO_INCH;
 
+  // light sensor 
   int currLightVal = analogRead(photoResistorPin);
   Serial.print(currLightVal);
 
