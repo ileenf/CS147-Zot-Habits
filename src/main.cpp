@@ -19,21 +19,8 @@ float distanceInch;
 // initialize temp/humidity sensor
 TempSensor tempSensor{75}; 
 
-// WiFi information
-char ssid[] = "Moto G (4) 7314";    
-char pass[] = "93f5b38274e5"; 
-
-// AWS server information
-const char kHostname[] = "13.52.98.79";
-int port = 5000;
-const char kPath[] = "/?var=10";
-const char username[] = "ubuntu";
-
-// weather API information
-
-
 void IRAM_ATTR detectsMovement(){
-  Serial.println("MOTION DETECTED!!!");
+  // Serial.println("MOTION DETECTED!!!");
 }
 
 void setup() {
@@ -54,7 +41,8 @@ void setup() {
   Serial.println();
   Serial.println();
 
-  initializeWifi(ssid, pass);
+  initializeWifi();
+  getWeatherData();
 }
 
 void loop() {

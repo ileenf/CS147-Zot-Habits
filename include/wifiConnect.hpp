@@ -4,10 +4,9 @@
 #include <WiFi.h>
 #include <HttpClient.h>
 
-void initializeWifi(const char* ssid, const char* pass);
+void initializeWifi();
+void getWeatherData();
 void httpRequest(const char* hostname, const char* path);
-
-
 
 #endif
 
