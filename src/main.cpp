@@ -17,7 +17,7 @@ float distanceCm;
 float distanceInch;
 
 // initialize temp/humidity sensor
-TempSensor tempSensor; 
+TempSensor tempSensor{75}; 
 
 // WiFi information
 char ssid[] = "Moto G (4) 7314";    
@@ -47,8 +47,7 @@ void setup() {
   pinMode(motionSensor, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(motionSensor), detectsMovement, RISING);
   
-  // initialize tempSensor with preferred indoor temp
-  tempSensor = TempSensor(75);
+ 
 
   // Connect to WiFi network
   delay(1000);

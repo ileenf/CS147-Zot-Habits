@@ -21,7 +21,7 @@ void TempSensor::setPreferredTemp(float newTemp){
 }
 
 // int TempSensor::giveRec(){
-//     float outdoor = readOutdoorTemp();
+//     float outdoor = getWeatherData();
 //     float indoor = readIndoorTemp();
 
 
