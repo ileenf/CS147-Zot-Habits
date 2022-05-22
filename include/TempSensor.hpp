@@ -10,15 +10,15 @@ public:
     TempSensor(float preferredTemp);
     
     void setPreferredTemp(float newTemp);  // user can alter indoor temp pref
-    // int giveRec();
-
+    float getPreferredTemp();
+    float readIndoorTemp();
 
 private:
 
     float prefTemp;
     DHT20 DHT;
 
-    float readIndoorTemp();
+    
 };
 
 
