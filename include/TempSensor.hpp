@@ -18,8 +18,8 @@ public:
     bool inFahrenheit();
 
 private:
-    bool f;
     float prefTemp; // stored in Celcius
+    bool f;  
     DHT20 DHT;
 
     

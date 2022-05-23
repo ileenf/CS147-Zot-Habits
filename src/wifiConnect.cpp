@@ -40,7 +40,7 @@ namespace {
     }
 
     tm* make_time_struct(){
-        struct tm * time_struct = get_cur_time();          // autofill the struct to default vals
+        struct tm * time_struct = getCurTime();          // autofill the struct to default vals
         return time_struct;
     }
     
@@ -146,7 +146,7 @@ float getOutsideTemp(StaticJsonDocument<1536> doc){
     return current_weather["temperature"]; // 62.7
 }
 
-tm* get_daily_sunset(StaticJsonDocument<1536> doc){
+tm* getDailySunset(StaticJsonDocument<1536> doc){
     JsonObject daily = doc["daily"];
     JsonArray daily_sunset = daily["sunset"];
 
@@ -155,7 +155,7 @@ tm* get_daily_sunset(StaticJsonDocument<1536> doc){
     return sunset_tm;
 }
 
-tm* get_daily_sunrise(StaticJsonDocument<1536> doc){
+tm* getDailySunrise(StaticJsonDocument<1536> doc){
     JsonObject daily = doc["daily"];
     JsonArray daily_sunrise = daily["sunrise"];
 
@@ -169,7 +169,7 @@ StaticJsonDocument<1536> requestWeatherJson() {
     return jsonify(resp);
  }
 
-tm* get_cur_time () {
+tm* getCurTime () {
     struct tm * t = new tm;
     configTime( gmtOffset_sec, daylightOffset_sec, ntpServer);
     if (!getLocalTime(t)){

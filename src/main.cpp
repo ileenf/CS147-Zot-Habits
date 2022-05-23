@@ -18,10 +18,6 @@ const int buzzerPin = GPIO_NUM_13;
 #define CM_TO_INCH 0.393701
 #define BUZZER_CHANNEL 0
 
-const int DO_NOTHING = 0;
-const int OPEN_WINDOW = 1;
-const int CLOSE_WINDOW = 2;
-
 
 bool isBreak = false;
 float maxSittingTime = 20000;
@@ -107,12 +103,12 @@ void setup() {
   weatherJson = requestWeatherJson();
   
   float outsideTemp = getOutsideTemp(weatherJson);
-  tm* curTm = get_cur_time();
-  tm* sunsetTm = get_daily_sunset(weatherJson);
-  tm* sunriseTm = get_daily_sunrise(weatherJson);
+  tm* curTm = getCurTime();
+  tm* sunsetTm = getDailySunset(weatherJson);
+  tm* sunriseTm = getDailySunrise(weatherJson);
 
-  print_cur_time(curTm);
-  print_weather_data(outsideTemp, sunriseTm, sunsetTm);
+  printCurTime(curTm);
+  printWeatherData(outsideTemp, sunriseTm, sunsetTm);
 
   delete sunsetTm;
   delete sunriseTm;
@@ -141,14 +137,14 @@ void loop() {
 
   //temp sensor
   // weatherJson = requestWeatherJson();
-  // float outdoor_temp = getOutsideTemp(weatherJson);
-  // float indoor_temp= tempSensor.readIndoorTemp();
-  // float pref_temp = tempSensor.getPreferredTemp();
+  // float outdoorTemp = getOutsideTemp(weatherJson);
+  // float indoorTemp = tempSensor.readIndoorTemp();
+  // float prefTemp = tempSensor.getPreferredTemp();
 
-  // print_indoor_temp(indoor_temp);
-  // print_outdoor_temp(outdoor_temp);
+  // printIndoorTemp(indoorTemp);
+  // printOutdoorTemp(outdoorTemp);
   
-  // int rec = giveRec(indoor_temp, outdoor_temp, pref_temp);
+  // int rec = giveRec(indoor_temp, outdoorTemp, prefTemp);
   // printRec(rec);
 
   delay(1000);

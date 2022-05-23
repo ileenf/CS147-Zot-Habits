@@ -1,23 +1,23 @@
  #include "helper.hpp"
  
- void print_weather_data(float outside_temp, tm* sunrise_tm, tm* sunset_tm){
+ void printWeatherData(float outside_temp, tm* sunrise_tm, tm* sunset_tm){
       Serial.println("-------- Weather data from API ---------");
       Serial.print("Outside temp = "); Serial.println(outside_temp);
       Serial.print("Sunrise = "); Serial.println(sunrise_tm, "%A, %B %d %Y %I:%M:%S");
       Serial.print("Sunset = "); Serial.println(sunset_tm, "%A, %B %d %Y %I:%M:%S");
     }  
 
-void print_cur_time(tm* cur_tm){
+void printCurTime(tm* cur_tm){
       Serial.println("-------- Current time ---------");
       Serial.println(cur_tm, "%A, %B %d %Y %I:%M:%S");
     }
 
-void print_indoor_temp(float temp){
+void printIndoorTemp(float temp){
       Serial.println("-------- Indoor temperature ---------");
       Serial.println(temp);
     }
 
-void print_outdoor_temp(float temp){
+void printOutdoorTemp(float temp){
       Serial.println("-------- Outdoor temperature ---------");
       Serial.println(temp);
     }
