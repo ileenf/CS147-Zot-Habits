@@ -14,8 +14,8 @@ void initializeWifi();
 std::string httpRequest(const char* hostname, const char* path, bool debug);
 StaticJsonDocument<BUF_SIZE> jsonify(const std::string response); 
 
-StaticJsonDocument<1536> getWeatherJson();
-float get_outside_temp(StaticJsonDocument<1536> doc);
+StaticJsonDocument<1536> requestWeatherJson();
+float getOutsideTemp(StaticJsonDocument<1536> doc);
 tm* get_daily_sunset(StaticJsonDocument<1536> doc);
 tm* get_daily_sunrise(StaticJsonDocument<1536> doc);
 tm* get_cur_time ();

@@ -141,7 +141,7 @@ StaticJsonDocument<1536> jsonify(const std::string response){
     return doc;
 }
 
-float get_outside_temp(StaticJsonDocument<1536> doc){
+float getOutsideTemp(StaticJsonDocument<1536> doc){
     JsonObject current_weather = doc["current_weather"];
     return current_weather["temperature"]; // 62.7
 }
@@ -164,7 +164,7 @@ tm* get_daily_sunrise(StaticJsonDocument<1536> doc){
     return sunrise_tm;
 }
 
-StaticJsonDocument<1536> getWeatherJson() {
+StaticJsonDocument<1536> requestWeatherJson() {
     std::string resp =  httpRequest(apiHostname, apiPath);
     return jsonify(resp);
  }
