@@ -1,49 +1,51 @@
 #include "TempSensor.hpp"
 
-// const int DO_NOTHING = 0;
-// const int OPEN_WINDOW = 1;
-// const int CLOSE_WINDOW = 2;
-
+namespace {
+    float toFahrenheit(float tempCelcius){
+        return (tempCelcius * (9/5)) + 32;
+    }
+    float toCelcius(float tempF){
+        return (tempF - 32) * (5/9 );
+    }
+}
 
 TempSensor::TempSensor(float preferredTemp)
-    : prefTemp{preferredTemp}
+    : prefTemp{preferredTemp}, f{false}
+    {
+        DHT.begin();
+    }
+
+TempSensor::TempSensor(float preferredTemp, bool inF)
+    : prefTemp{preferredTemp}, f{inF}
     {
         DHT.begin();
     }
 
 float TempSensor::readIndoorTemp(){
     DHT.read();
-    return DHT.getTemperature();
+    float inCelcius = DHT.getTemperature();
+    if (f){
+        return toFahrenheit(inCelcius);
+    }
+    return inCelcius;
+}
+
+float TempSensor::getPreferredTemp(){
+    if (f){
+        return toFahrenheit(prefTemp);
+    }
+    return prefTemp;
 }
 
 void TempSensor::setPreferredTemp(float newTemp){
-    prefTemp = newTemp;
+    if (f){
+        prefTemp = toCelcius(newTemp);
+    }
+    else {
+        prefTemp = newTemp;
+    }
 }
 
-// int TempSensor::giveRec(){
-//     float outdoor = getWeatherData();
-//     float indoor = readIndoorTemp();
-
-
-//     if (outdoor > indoor && indoor < prefTemp){
-//         // OPEN WINDOW TO WARM UP HOUSE b/c it's too cold inside
-//         return OPEN_WINDOW;
-//     }
-//     if (outdoor > indoor && indoor >= prefTemp){
-//         // CLOSE WINDOW, TURN ON AC b/c too hot outside
-//         return CLOSE_WINDOW;
-//     }
-//     if (outdoor < indoor && indoor > prefTemp){
-//         // OPEN WINDOW TO COOL DOWN HOUSE b/c it's too warm inside
-//         return OPEN_WINDOW;
-//     }
-//     if (outdoor < indoor && indoor <= prefTemp){
-//         // CLOSE WINDOW, TURN ON HEATER b/c it's too cold outside
-//         return CLOSE_WINDOW;
-//     }
-
-//     // if outdoor == indoor
-//     return DO_NOTHING;
-    
-    
-// }   
+bool TempSensor::inFahrenheit(){
+    return f;
+}

@@ -3,22 +3,26 @@
 
 #include "DHT20.h"
 
+
 class TempSensor
 {
 public:
     // initialize with a preferred temp
     TempSensor(float preferredTemp);
+    // specify units
+    TempSensor(float preferredTemp, bool inF);
     
     void setPreferredTemp(float newTemp);  // user can alter indoor temp pref
-    // int giveRec();
-
+    float getPreferredTemp();
+    float readIndoorTemp();
+    bool inFahrenheit();
 
 private:
-
-    float prefTemp;
+    float prefTemp; // stored in Celcius
+    bool f;  
     DHT20 DHT;
 
-    float readIndoorTemp();
+    
 };
 
 

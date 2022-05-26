@@ -6,12 +6,13 @@
 #include "Motion.hpp"
 #include "Distance.hpp"
 #include <Tone32.h>
+#include "helper.hpp"
 
-const int trigPin = GPIO_NUM_25;
+const int trigPin = GPIO_NUM_25;  
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
-const int photoResistorPin = GPIO_NUM_32;
-const int buzzerPin = GPIO_NUM_12;
+const int photoResistorPin = GPIO_NUM_32; // 25 in use by wifi
+const int buzzerPin = GPIO_NUM_13;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -28,10 +29,9 @@ float distanceCm;
 float distanceInch;
 float volatile movementDetected = false;
 
-// initialize temp/humidity sensor
-TempSensor tempSensor{75}; 
+StaticJsonDocument<BUF_SIZE> weatherJson;
 
-// initialize distance sensor
+TempSensor tempSensor{75, true};           // prefTemp = 75, units in Fahrenheit
 Distance distanceSensor{trigPin, echoPin};
 
 void IRAM_ATTR detectsMovement(){
@@ -79,13 +79,18 @@ void setup() {
   // motion sensor
   pinMode(motionSensorPin, INPUT);
   attachInterrupt(motionSensorPin, detectsMovement, RISING);
-  
+
+  // Connect to WiFi network
+  delay(1000);
+  Serial.println();
+  Serial.println();
+  initializeWifi();
 }
 
 void loop() {
   // distance sensor -- measure time it takes for signal to return 
   float distance = getCurrentDistance();
-  Serial.print("distace: ");
+  Serial.print("distance: ");
   Serial.println(distance);
   Serial.print("threshold: ");
   Serial.println(distanceSensor.getDistanceThreshold());
@@ -100,7 +105,7 @@ void loop() {
     startBreak = millis();
     // send to aws to notify user has exceeded their sitting time
   }
-  Serial.print("movement detected?: ");
+  Serial.print("movement detected: ");
   Serial.println(movementDetected);
   if (distanceSensor.distanceGreaterThanThreshold() && movementDetected) {
     // person has moved away
@@ -109,8 +114,8 @@ void loop() {
     movementDetected = false;
   }
   // light sensor 
-  // int currLightVal = analogRead(photoResistorPin);
-  // Serial.print(currLightVal);
+  int currLightVal = analogRead(photoResistorPin);
+  Serial.print(currLightVal);
 
   // buzzer when break is over
   if (isBreak && millis() - startBreak >= breakDuration) {
@@ -118,7 +123,33 @@ void loop() {
     isBreak = false;
     initialSittingTime = millis();
   }
+  
+  //temp sensor
+  weatherJson = requestWeatherJson();
+  tm* curTm = getCurTime();
+  tm* sunsetTm = getDailySunset(weatherJson);
+  tm* sunriseTm = getDailySunrise(weatherJson);
+  float outdoorTemp = getOutsideTemp(weatherJson);
+  printWeatherData(outdoorTemp, sunriseTm, sunsetTm);
 
-  delay(500);
- 
+  float indoorTemp = tempSensor.readIndoorTemp();
+  float prefTemp = tempSensor.getPreferredTemp();
+  int rec = giveTempRec(indoorTemp, outdoorTemp, prefTemp);
+
+  printIndoorTemp(indoorTemp);
+  printOutdoorTemp(outdoorTemp);
+  printTempRec(rec);
+
+  // light sensor 
+  int currLightVal = analogRead(photoResistorPin);
+  int lightRec = giveLightRec(curTm, sunsetTm, sunriseTm, currLightVal);
+  
+  printCurTime(curTm);
+  printIndoorLight(currLightVal);
+  printLightRec(lightRec);
+
+  delete sunsetTm;
+  delete sunriseTm;
+  delete curTm;
 }
+
