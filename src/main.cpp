@@ -11,7 +11,7 @@ const int trigPin = GPIO_NUM_25;
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
 const int photoResistorPin = GPIO_NUM_32;
-const int buzzerPin = GPIO_NUM_13;
+const int buzzerPin = GPIO_NUM_12;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
@@ -26,6 +26,7 @@ float breakDuration = 10000;
 long duration;
 float distanceCm;
 float distanceInch;
+float volatile movementDetected = false;
 
 // initialize temp/humidity sensor
 TempSensor tempSensor{75}; 
@@ -34,10 +35,7 @@ TempSensor tempSensor{75};
 Distance distanceSensor{trigPin, echoPin};
 
 void IRAM_ATTR detectsMovement(){
-  Serial.println("MOTION DETECTED!!!");
-  if (distanceSensor.distanceGreaterThanThreshold()) {
-    currentSittingTime = 0;
-  }
+  movementDetected = true;
 }
 
 float getCurrentDistance() {
@@ -55,7 +53,7 @@ float getCurrentDistance() {
 
 void playBuzzer() {
   float startTime = millis();
-  while (millis() - startTime < 5000) {
+  while (millis() - startTime < 1500) {
     tone(buzzerPin, NOTE_C4, 500, BUZZER_CHANNEL);
     noTone(buzzerPin, BUZZER_CHANNEL);
   }
@@ -75,55 +73,52 @@ void setup() {
   initialSittingTime = millis();
 
   // intialize distance threshold (distance from sitting down position)
-  delay(10000);
   float threshold = getCurrentDistance();
   distanceSensor.initializeDistanceThreshold(threshold);
-  delay(1000);
 
   // motion sensor
-  pinMode(motionSensorPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(motionSensorPin), detectsMovement, RISING);
+  pinMode(motionSensorPin, INPUT);
+  attachInterrupt(motionSensorPin, detectsMovement, RISING);
   
-
-  // Connect to WiFi network
-  delay(1000);
-  Serial.println();
-  Serial.println();
-
-  // initializeWifi();
 }
 
 void loop() {
-  // distance sensor -- emit signal 
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
   // distance sensor -- measure time it takes for signal to return 
   float distance = getCurrentDistance();
+  Serial.print("distace: ");
+  Serial.println(distance);
+  Serial.print("threshold: ");
+  Serial.println(distanceSensor.getDistanceThreshold());
   currentSittingTime = millis() - initialSittingTime;
-  if (currentSittingTime > maxSittingTime) {
+  Serial.print("current sitting time: ");
+  Serial.println(currentSittingTime);
+
+  if (currentSittingTime > maxSittingTime && !isBreak) {
     // user needs to take a break now, buzzer to start break
     playBuzzer();
     isBreak = true;
     startBreak = millis();
     // send to aws to notify user has exceeded their sitting time
   }
-
+  Serial.print("movement detected?: ");
+  Serial.println(movementDetected);
+  if (distanceSensor.distanceGreaterThanThreshold() && movementDetected) {
+    // person has moved away
+    Serial.println("person has moved away");
+    initialSittingTime = millis();
+    movementDetected = false;
+  }
   // light sensor 
-  int currLightVal = analogRead(photoResistorPin);
-  Serial.print(currLightVal);
+  // int currLightVal = analogRead(photoResistorPin);
+  // Serial.print(currLightVal);
 
-  // HTTP Requests
-  delay(1000);
-  httpRequest("worldtimeapi.org", "/api/timezone/Europe/London.txt");
-  
   // buzzer when break is over
   if (isBreak && millis() - startBreak >= breakDuration) {
     playBuzzer();
     isBreak = false;
     initialSittingTime = millis();
   }
+
+  delay(500);
+ 
 }

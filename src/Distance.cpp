@@ -1,4 +1,6 @@
 #include "Distance.hpp"
+#define SOUND_SPEED 0.034
+#define CM_TO_INCH 0.393701
 
 Distance::Distance(const int trigPin, const int echoPin)
     : trigPin{trigPin}, echoPin{echoPin} {
@@ -22,5 +24,5 @@ float Distance::getDistanceInch() const {
 }
 
 bool Distance::distanceGreaterThanThreshold() {
-    return distanceInch > distanceThreshold;
+    return distanceInch > distanceThreshold - 10;
 }
