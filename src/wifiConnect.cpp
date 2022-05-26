@@ -79,8 +79,9 @@ std::string httpRequest(const char* hostname,  const char* path, bool debug=fals
     
         err = http.responseStatusCode();
         if (err >= 0) {
-            Serial.print("Got status code: ");
-            Serial.println(err);
+             if (debug){ Serial.print("Got status code: "); Serial.println(err); }
+            
+            
 
         err = http.skipResponseHeaders();
             if (err >= 0) {

@@ -8,16 +8,15 @@
 #include <Tone32.h>
 #include "helper.hpp"
 
-const int trigPin = GPIO_NUM_25;
+const int trigPin = GPIO_NUM_25;  
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
-const int photoResistorPin = GPIO_NUM_32;
+const int photoResistorPin = GPIO_NUM_32; // 25 in use by wifi
 const int buzzerPin = GPIO_NUM_13;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
 #define BUZZER_CHANNEL 0
-
 
 bool isBreak = false;
 float maxSittingTime = 20000;
@@ -31,14 +30,7 @@ float distanceInch;
 
 StaticJsonDocument<BUF_SIZE> weatherJson;
 
-namespace {
-   
-}
-
-// initialize temp/humidity sensor
-TempSensor tempSensor{75}; 
-
-// initialize distance sensor
+TempSensor tempSensor{75, true};           // prefTemp = 75, units in Fahrenheit
 Distance distanceSensor{trigPin, echoPin};
 
 void IRAM_ATTR detectsMovement(){
@@ -90,30 +82,13 @@ void setup() {
 
   // motion sensor
   pinMode(motionSensorPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(motionSensorPin), detectsMovement, RISING);
+  // attachInterrupt(digitalPinToInterrupt(motionSensorPin), detectsMovement, RISING);
 
   // Connect to WiFi network
   delay(1000);
   Serial.println();
   Serial.println();
-
   initializeWifi();
-
-  // Weather API request
-  weatherJson = requestWeatherJson();
-  
-  float outsideTemp = getOutsideTemp(weatherJson);
-  tm* curTm = getCurTime();
-  tm* sunsetTm = getDailySunset(weatherJson);
-  tm* sunriseTm = getDailySunrise(weatherJson);
-
-  printCurTime(curTm);
-  printWeatherData(outsideTemp, sunriseTm, sunsetTm);
-
-  delete sunsetTm;
-  delete sunriseTm;
-  delete curTm;
-
     
 }
 
@@ -121,7 +96,7 @@ void loop() {
 
 
   // distance sensor -- measure time it takes for signal to return 
-  // float distance = getCurrentDistance();
+  float distance = getCurrentDistance();
   // currentSittingTime = millis() - initialSittingTime;
   // if (currentSittingTime > maxSittingTime) {
   //   // user needs to take a break now, buzzer to start break
@@ -131,28 +106,46 @@ void loop() {
   //   // send to aws to notify user has exceeded their sitting time
   // }
 
-  // light sensor 
-  // int currLightVal = analogRead(photoResistorPin);
-  // Serial.println(currLightVal);
+  
 
   //temp sensor
-  // weatherJson = requestWeatherJson();
-  // float outdoorTemp = getOutsideTemp(weatherJson);
-  // float indoorTemp = tempSensor.readIndoorTemp();
-  // float prefTemp = tempSensor.getPreferredTemp();
+  weatherJson = requestWeatherJson();
+  tm* curTm = getCurTime();
+  tm* sunsetTm = getDailySunset(weatherJson);
+  tm* sunriseTm = getDailySunrise(weatherJson);
+  float outdoorTemp = getOutsideTemp(weatherJson);
+  printWeatherData(outdoorTemp, sunriseTm, sunsetTm);
 
-  // printIndoorTemp(indoorTemp);
-  // printOutdoorTemp(outdoorTemp);
+  float indoorTemp = tempSensor.readIndoorTemp();
+  float prefTemp = tempSensor.getPreferredTemp();
+  int rec = giveTempRec(indoorTemp, outdoorTemp, prefTemp);
+
+  printIndoorTemp(indoorTemp);
+  printOutdoorTemp(outdoorTemp);
+  printTempRec(rec);
+
+  // light sensor 
+  int currLightVal = analogRead(photoResistorPin);
+  int lightRec = giveLightRec(curTm, sunsetTm, sunriseTm, currLightVal);
   
-  // int rec = giveRec(indoor_temp, outdoorTemp, prefTemp);
-  // printRec(rec);
+  printCurTime(curTm);
+  printIndoorLight(currLightVal);
+  printLightRec(lightRec);
 
-  delay(1000);
+  delete sunsetTm;
+  delete sunriseTm;
+  delete curTm;
+
+  
+
+  delay(2000);
   
   // buzzer when break is over
-  if (isBreak && millis() - startBreak >= breakDuration) {
-    playBuzzer();
-    isBreak = false;
-    initialSittingTime = millis();
-  }
+  // if (isBreak && millis() - startBreak >= breakDuration) {
+  //   playBuzzer();
+  //   isBreak = false;
+  //   initialSittingTime = millis();
+  // }
+
+  
 }
