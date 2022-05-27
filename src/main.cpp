@@ -29,6 +29,9 @@ float distanceCm;
 float distanceInch;
 float volatile movementDetected = false;
 int exceededSittingTime = 0;
+char sittingStr[] = "numExceededSitting";
+char outdoorStr[] = "outdoorTemp";
+char indoorStr[] = "indoorTemp";
 
 StaticJsonDocument<BUF_SIZE> weatherJson;
 
@@ -116,7 +119,6 @@ void loop() {
 
   } else {
       // send to aws to notify user has exceeded their sitting time
-      char sittingStr[] = "numExceededSitting";
       exceededSittingTime++;
       sendData(sittingStr, exceededSittingTime);
     }
@@ -154,13 +156,11 @@ void loop() {
   printTempRec(rec);
 
   // send outdoor temp data to aws
-  char outdoorStr[] = "outdoorTemp";
   sendData(outdoorStr, outdoorTemp);
   Serial.println(outdoorTemp);
   delay(2000);
 
   // send indoor temp data to aws
-  char indoorStr[] = "indoorTemp";
   sendData(indoorStr, indoorTemp);
   Serial.println(indoorTemp);
 
