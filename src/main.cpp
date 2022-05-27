@@ -158,7 +158,6 @@ void loop() {
   // send outdoor temp data to aws
   sendData(outdoorStr, outdoorTemp);
   Serial.println(outdoorTemp);
-  delay(2000);
 
   // send indoor temp data to aws
   sendData(indoorStr, indoorTemp);
