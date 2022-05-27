@@ -28,6 +28,7 @@ long duration;
 float distanceCm;
 float distanceInch;
 float volatile movementDetected = false;
+int exceededSittingTime = 0;
 
 StaticJsonDocument<BUF_SIZE> weatherJson;
 
@@ -100,10 +101,25 @@ void loop() {
 
   if (currentSittingTime > maxSittingTime && !isBreak) {
     // user needs to take a break now, buzzer to start break
-    playBuzzer();
-    isBreak = true;
-    startBreak = millis();
-    // send to aws to notify user has exceeded their sitting time
+    if (distanceSensor.distanceGreaterThanThreshold() && movementDetected) {
+      // person has moved away
+      Serial.println("person has moved away");
+      initialSittingTime = millis();
+      movementDetected = false;
+      playBuzzer();
+      isBreak = true;
+      startBreak = millis();
+
+      // send to aws all times without standing up
+      char sittingDuration[] = "sittingDuration";
+      sendData(sittingDuration, currentSittingTime);
+
+  } else {
+      // send to aws to notify user has exceeded their sitting time
+      char sittingStr[] = "numExceededSitting";
+      exceededSittingTime++;
+      sendData(sittingStr, exceededSittingTime);
+    }
   }
   Serial.print("movement detected: ");
   Serial.println(movementDetected);
@@ -113,9 +129,6 @@ void loop() {
     initialSittingTime = millis();
     movementDetected = false;
   }
-  // light sensor 
-  int currLightVal = analogRead(photoResistorPin);
-  Serial.print(currLightVal);
 
   // buzzer when break is over
   if (isBreak && millis() - startBreak >= breakDuration) {
@@ -139,6 +152,17 @@ void loop() {
   printIndoorTemp(indoorTemp);
   printOutdoorTemp(outdoorTemp);
   printTempRec(rec);
+
+  // send outdoor temp data to aws
+  char outdoorStr[] = "outdoorTemp";
+  sendData(outdoorStr, outdoorTemp);
+  Serial.println(outdoorTemp);
+  delay(2000);
+
+  // send indoor temp data to aws
+  char indoorStr[] = "indoorTemp";
+  sendData(indoorStr, indoorTemp);
+  Serial.println(indoorTemp);
 
   // light sensor 
   int currLightVal = analogRead(photoResistorPin);

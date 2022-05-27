@@ -19,6 +19,8 @@ float getOutsideTemp(StaticJsonDocument<1536> doc);
 tm* getDailySunset(StaticJsonDocument<1536> doc);
 tm* getDailySunrise(StaticJsonDocument<1536> doc);
 tm* getCurTime ();
+void sendSittingData(int numExceededSittingTime);
+void sendData(char* pathName, int temp);
 
 #endif
 

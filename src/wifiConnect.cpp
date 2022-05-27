@@ -11,7 +11,6 @@ char pass[] = "93f5b38274e5";
 // AWS server information
 const char kHostname[] = "13.52.98.79";
 int port = 5000;
-const char kPath[] = "/?var=10";
 const char username[] = "ubuntu";
 
 // weather API information
@@ -73,7 +72,7 @@ std::string httpRequest(const char* hostname,  const char* path, bool debug=fals
     HttpClient http(c);
     std::string payload("");
 
-    err = http.get(hostname, path);
+    err = http.get(hostname, port, path);
     if (err == 0) {   
         if (debug){  Serial.println("startedRequest ok"); }
     
@@ -175,4 +174,17 @@ tm* getCurTime () {
     }
     return t;
 }
+
+void sendSittingData(int numExceededSitting) {
+    char path[50];
+    sprintf(path, "/?numExceededSitting=%d", numExceededSitting);
+    httpRequest(kHostname, path);
+}
+
+void sendData(char *pathName, int temp) {
+    char path[50];
+    sprintf(path, "/?%s=%d", pathName, temp);
+    httpRequest(kHostname, path);
+}
+
 
