@@ -16,6 +16,7 @@ void calibrateLightSensor(int& minLightVal, int& maxLightVal, int photoResPin);
 float getLightVal(float minLight, float maxLight, float rawVal);
 
 void printWeatherData(float outsideTemp, tm* sunriseTm, tm* sunsetTm);
+void printSensorData(float temp, float light);
 void printCurTime(tm* curTm);
 void printIndoorTemp(float temp);
 void printOutdoorTemp(float temp);

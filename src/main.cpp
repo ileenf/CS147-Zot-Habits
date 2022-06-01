@@ -12,14 +12,16 @@
 const int trigPin = GPIO_NUM_25;  
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
-const int photoResistorPin = GPIO_NUM_32; // 25 in use by wifi
+const int photoResistorPin = GPIO_NUM_32; 
 const int buzzerPin = GPIO_NUM_13;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
 #define BUZZER_CHANNEL 0
+#define TEMP_LIGHT_TIMER 10000;
 
 unsigned int numDarkIndoors = 0;
+float halfMinuteTimer;
 bool isBreak = false;
 bool stoodUp = false;
 float maxSittingTime = 20000;
@@ -81,6 +83,9 @@ void setup() {
 
   // buzzer
   pinMode(buzzerPin, OUTPUT);
+
+  // initialize timer for temp/light sensor
+  halfMinuteTimer = millis() + TEMP_LIGHT_TIMER;
 
   // initialize sitting time
   initialSittingTime = millis();
@@ -157,27 +162,20 @@ void loop() {
     }
   }
   
-    // temp sensor
+  if (millis() > halfMinuteTimer){   // collect temp/light readings every minute
     weatherJson = requestWeatherJson();
-    
     tm* sunsetTm = getDailySunset(weatherJson);
     tm* sunriseTm = getDailySunrise(weatherJson);
     float outdoorTemp = getOutsideTemp(weatherJson);
     float indoorTemp = tempSensor.readIndoorTemp();
-    float prefTemp = tempSensor.getPreferredTemp();
-    int rec = giveTempRec(indoorTemp, outdoorTemp, prefTemp);
+    int rec = giveTempRec(indoorTemp, outdoorTemp, tempSensor.getPreferredTemp());
 
-    //light sensor
     int currLightVal = getLightVal(minLightVal, maxLightVal, analogRead(photoResistorPin));
     int lightRec = giveLightRec(curTm, sunsetTm, sunriseTm, currLightVal);
-    
-    
-
+  
     printCurTime(curTm);
     printWeatherData(outdoorTemp, sunriseTm, sunsetTm);
-    printIndoorTemp(indoorTemp);
-    printOutdoorTemp(outdoorTemp);
-    printIndoorLight(currLightVal);
+    printSensorData(indoorTemp, currLightVal);
 
     printTempRec(rec);
     printLightRec(lightRec);
@@ -192,8 +190,8 @@ void loop() {
     delete sunriseTm;
     delete curTm;
 
-   
-
-    delay(3000);
+    halfMinuteTimer = millis() + TEMP_LIGHT_TIMER;
+  }
+  delay(3000);
 }
 

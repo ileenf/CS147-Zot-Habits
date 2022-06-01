@@ -37,28 +37,32 @@
       Serial.print("Sunset = "); Serial.println(sunsetTm, "%A, %B %d %Y %I:%M:%S");
     }  
 
+void printSensorData(float temp, float light){
+  printIndoorTemp(temp);
+  printIndoorLight(light);
+}
+
 void printCurTime(tm* curTm){
-      Serial.println("-------- Current time ---------");
-      Serial.println(curTm, "%A, %B %d %Y %I:%M:%S");
+      Serial.println(curTm, "Current time =   %A, %B %d %Y %I:%M:%S");
     }
 
 void printIndoorTemp(float temp){
-      Serial.println("-------- Indoor temperature ---------");
+      Serial.print("Indoor temperature =   ");
       Serial.println(temp);
     }
 
 void printOutdoorTemp(float temp){
-      Serial.println("-------- Outdoor temperature -------");
+      Serial.print("Outdoor temperature =   ");
       Serial.println(temp);
     }
 
 void printIndoorLight(int lightVal){
-    Serial.println("-------- Indoor light -------");
+    Serial.print("Indoor light =    ");
     Serial.println(lightVal);
 }
 
 void printTempRec(int rec){
-    Serial.println("---- Temperature Recommendation -----");
+    Serial.print("Temperature Recommendation =  ");
       if (rec == DO_NOTHING){
         Serial.println("Do nothing");
       }
@@ -68,11 +72,10 @@ void printTempRec(int rec){
       else if (rec == CLOSE_WINDOW){
         Serial.println("Close window");
       }
-      Serial.println();
     }
 
 void printLightRec(int rec){
-    Serial.println("---- Light Recommendation -----");
+    Serial.println("Light Recommendation:   ");
       if (rec == DO_NOTHING){
         Serial.println("Do nothing");
       }
