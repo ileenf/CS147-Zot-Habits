@@ -6,12 +6,13 @@
 
 #include <string>
 #include <WiFi.h>
-#include <HttpClient.h>
+#include <HTTPClient.h>
 #include <ArduinoJSON.h>
 #include "time.h"
 
 void initializeWifi();
-std::string httpRequest(const char* hostname, const char* path, bool debug);
+std::string httpRequest(const char* url);
+void httpPost(const char* serverName, const char* body);
 StaticJsonDocument<BUF_SIZE> jsonify(const std::string response); 
 
 StaticJsonDocument<1536> requestWeatherJson();
@@ -19,8 +20,11 @@ float getOutsideTemp(StaticJsonDocument<1536> doc);
 tm* getDailySunset(StaticJsonDocument<1536> doc);
 tm* getDailySunrise(StaticJsonDocument<1536> doc);
 tm* getCurTime ();
-void sendSittingData(int numExceededSittingTime);
-void sendData(char* pathName, int temp);
+
+void postTempAndLight(float outdoorTemp, float indoorTemp, float indoorLight, std::string time);
+void postExceededSitting(unsigned int numExceededSitting);
+void postSittingDuration(float sitDuration, std::string time);
+void postNumDarkIndoors(unsigned int numDarkIndoors);
 
 #endif
 

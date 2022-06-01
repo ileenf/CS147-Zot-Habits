@@ -1,4 +1,34 @@
  #include "helper.hpp"
+
+ float convToSec(float ms){
+   return ms / 1000;
+ }
+
+ void calibrateLightSensor(int& minLightVal, int& maxLightVal, int photoResPin){
+
+    int start_time = millis();
+    int time_elapsed = millis() - start_time;
+
+    // ten seconds
+    Serial.println("Starting light sensor calibration for 10 secs...");
+    sleep(2);
+    
+    while (time_elapsed < 10000){
+      int cur_light_val =  analogRead(photoResPin);
+      Serial.println(cur_light_val);
+
+      minLightVal = min(cur_light_val, minLightVal);
+      maxLightVal = max(cur_light_val, maxLightVal);
+      time_elapsed = millis() - start_time;
+  }
+  Serial.print("Min = "); Serial.println(minLightVal);
+  Serial.print("Max = "); Serial.println(maxLightVal);
+ }
+
+ float getLightVal(float minLight, float maxLight, float rawVal){
+   // val between 0 and 100
+   return (100 * (rawVal - minLight)) / (maxLight - minLight);
+ }
  
  void printWeatherData(float outsideTemp, tm* sunriseTm, tm* sunsetTm){
       Serial.println("-------- Weather data from API ---------");
@@ -77,11 +107,6 @@ int giveTempRec(float indoor, float outdoor, float prefTemp){
 }   
 
 int tmCompare(tm* t1, tm* t2){
-
-  // Serial.print("t1 hour: "); Serial.print(t1->tm_hour); Serial.print(", t2 hour: "); Serial.print(t2->tm_hour);
-  // Serial.print("t1 min: "); Serial.print(t1->tm_min); Serial.print(", t2 min: "); Serial.print(t2->tm_min);
-  // Serial.print("t1 sec: "); Serial.print(t1->tm_sec); Serial.print(", t2 sec: "); Serial.print(t2->tm_sec);
-
   if (t1->tm_hour > t2->tm_hour){       // t1 hour > t2 hour
       return 1;
   }
@@ -104,7 +129,6 @@ int tmCompare(tm* t1, tm* t2){
           }
       }
   }
-
   // secs equal
   return 0;
 }
@@ -122,12 +146,20 @@ int giveLightRec(tm* curTm, tm* sunset, tm* sunrise, float curLightVal){
         // If it’s daytime outside, open blinds -- curTm >= sunrise && curTm <= sunset
         if (isDaytime(curTm, sunset, sunrise)){
             return OPEN_BLINDS;
+        } 
+        else {
+          // If it's nighttime, turn on lights
+          return TURN_ON_LIGHT;
         }
-         // If it's nighttime, turn on lights
-        return TURN_ON_LIGHT;
     }
     // else, light levels are sufficient
     return DO_NOTHING;
+}
+
+void getTimeString(tm* curTm, std::string& str){
+  char timeStr[100];
+  sprintf(timeStr, "%d:%d:%d", curTm->tm_hour, curTm->tm_min, curTm->tm_sec);
+  str = timeStr;
 }
 
 

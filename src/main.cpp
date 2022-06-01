@@ -8,6 +8,7 @@
 #include <Tone32.h>
 #include "helper.hpp"
 
+
 const int trigPin = GPIO_NUM_25;  
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
@@ -18,7 +19,9 @@ const int buzzerPin = GPIO_NUM_13;
 #define CM_TO_INCH 0.393701
 #define BUZZER_CHANNEL 0
 
+unsigned int numDarkIndoors = 0;
 bool isBreak = false;
+bool stoodUp = false;
 float maxSittingTime = 20000;
 float initialSittingTime;
 float currentSittingTime;
@@ -32,6 +35,8 @@ int exceededSittingTime = 0;
 char sittingStr[] = "numExceededSitting";
 char outdoorStr[] = "outdoorTemp";
 char indoorStr[] = "indoorTemp";
+int minLightVal = INT_MAX;
+int maxLightVal = INT_MIN;
 
 StaticJsonDocument<BUF_SIZE> weatherJson;
 
@@ -40,6 +45,7 @@ Distance distanceSensor{trigPin, echoPin};
 
 void IRAM_ATTR detectsMovement(){
   movementDetected = true;
+  Serial.println("MOTION DETECTED");
 }
 
 float getCurrentDistance() {
@@ -70,6 +76,9 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
+  // light sensor
+  calibrateLightSensor(minLightVal, maxLightVal, photoResistorPin);
+
   // buzzer
   pinMode(buzzerPin, OUTPUT);
 
@@ -92,87 +101,99 @@ void setup() {
 }
 
 void loop() {
+
+  tm* curTm = getCurTime(); 
+  std::string timeStr = "";
+  getTimeString(curTm, timeStr);
+
   // distance sensor -- measure time it takes for signal to return 
   float distance = getCurrentDistance();
-  Serial.print("distance: ");
-  Serial.println(distance);
-  Serial.print("threshold: ");
-  Serial.println(distanceSensor.getDistanceThreshold());
   currentSittingTime = millis() - initialSittingTime;
-  Serial.print("current sitting time: ");
-  Serial.println(currentSittingTime);
+  
+  Serial.print("distance to closest object: "); Serial.println(distance);
+  Serial.print("threshold: "); Serial.println(distanceSensor.getDistanceThreshold());
+  Serial.print("current sitting time (sec): "); Serial.println(convToSec(currentSittingTime));
+  Serial.println();
 
-  if (currentSittingTime > maxSittingTime && !isBreak) {
-    // user needs to take a break now, buzzer to start break
+  if (currentSittingTime > maxSittingTime && !isBreak) {      // user needs to take a break now, buzzer to start break
+    Serial.println(" BREAK TIME!!! ");
+    playBuzzer();
     if (distanceSensor.distanceGreaterThanThreshold() && movementDetected) {
       // person has moved away
-      Serial.println("person has moved away");
+      Serial.println("-- BREAK TIME, person has moved away --");
+      stoodUp = true;
       initialSittingTime = millis();
       movementDetected = false;
-      playBuzzer();
-      isBreak = true;
-      startBreak = millis();
 
-      // send to aws all times without standing up
-      char sittingDuration[] = "sittingDuration";
-      sendData(sittingDuration, currentSittingTime);
+      Serial.print("sittingDuration: "); Serial.println(currentSittingTime);
+      postSittingDuration(currentSittingTime, timeStr); //how long they sat for
 
-  } else {
-      // send to aws to notify user has exceeded their sitting time
+    } else {  // send to aws to notify user has exceeded their sitting time
+      Serial.println(" BREAK TIME, person stayed sitting ");
       exceededSittingTime++;
-      sendData(sittingStr, exceededSittingTime);
+      stoodUp = false;
+      Serial.print("exceededSittingTime: "); Serial.println(exceededSittingTime);
+      postExceededSitting(exceededSittingTime); // num times that user exceeded sitting time, sends every second during break!!!
     }
+    isBreak = true;
+    startBreak = millis();
+
   }
-  Serial.print("movement detected: ");
-  Serial.println(movementDetected);
+
   if (distanceSensor.distanceGreaterThanThreshold() && movementDetected) {
     // person has moved away
-    Serial.println("person has moved away");
+    Serial.println("-- NOT BREAK, person has moved away --");
     initialSittingTime = millis();
     movementDetected = false;
   }
 
   // buzzer when break is over
   if (isBreak && millis() - startBreak >= breakDuration) {
+    Serial.println(" BREAK OVER");
     playBuzzer();
     isBreak = false;
-    initialSittingTime = millis();
+    if (stoodUp){
+      initialSittingTime = millis();
+    }
   }
   
-  //temp sensor
-  weatherJson = requestWeatherJson();
-  tm* curTm = getCurTime();
-  tm* sunsetTm = getDailySunset(weatherJson);
-  tm* sunriseTm = getDailySunrise(weatherJson);
-  float outdoorTemp = getOutsideTemp(weatherJson);
-  printWeatherData(outdoorTemp, sunriseTm, sunsetTm);
+    // temp sensor
+    weatherJson = requestWeatherJson();
+    
+    tm* sunsetTm = getDailySunset(weatherJson);
+    tm* sunriseTm = getDailySunrise(weatherJson);
+    float outdoorTemp = getOutsideTemp(weatherJson);
+    float indoorTemp = tempSensor.readIndoorTemp();
+    float prefTemp = tempSensor.getPreferredTemp();
+    int rec = giveTempRec(indoorTemp, outdoorTemp, prefTemp);
 
-  float indoorTemp = tempSensor.readIndoorTemp();
-  float prefTemp = tempSensor.getPreferredTemp();
-  int rec = giveTempRec(indoorTemp, outdoorTemp, prefTemp);
+    //light sensor
+    int currLightVal = getLightVal(minLightVal, maxLightVal, analogRead(photoResistorPin));
+    int lightRec = giveLightRec(curTm, sunsetTm, sunriseTm, currLightVal);
+    
+    
 
-  printIndoorTemp(indoorTemp);
-  printOutdoorTemp(outdoorTemp);
-  printTempRec(rec);
+    printCurTime(curTm);
+    printWeatherData(outdoorTemp, sunriseTm, sunsetTm);
+    printIndoorTemp(indoorTemp);
+    printOutdoorTemp(outdoorTemp);
+    printIndoorLight(currLightVal);
 
-  // send outdoor temp data to aws
-  sendData(outdoorStr, outdoorTemp);
-  Serial.println(outdoorTemp);
+    printTempRec(rec);
+    printLightRec(lightRec);
 
-  // send indoor temp data to aws
-  sendData(indoorStr, indoorTemp);
-  Serial.println(indoorTemp);
+    if (lightRec == OPEN_BLINDS || lightRec == TURN_ON_LIGHT){
+      numDarkIndoors++;
+      postNumDarkIndoors(numDarkIndoors);// number of times it was dark indoors
+    }
+    postTempAndLight(outdoorTemp, indoorTemp, currLightVal, timeStr);
 
-  // light sensor 
-  int currLightVal = analogRead(photoResistorPin);
-  int lightRec = giveLightRec(curTm, sunsetTm, sunriseTm, currLightVal);
-  
-  printCurTime(curTm);
-  printIndoorLight(currLightVal);
-  printLightRec(lightRec);
+    delete sunsetTm;
+    delete sunriseTm;
+    delete curTm;
 
-  delete sunsetTm;
-  delete sunriseTm;
-  delete curTm;
+   
+
+    delay(3000);
 }
 
