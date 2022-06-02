@@ -8,12 +8,11 @@
 #include <Tone32.h>
 #include "helper.hpp"
 
-
 const int trigPin = GPIO_NUM_25;  
 const int echoPin = GPIO_NUM_15;
 const int motionSensorPin = GPIO_NUM_13;
 const int photoResistorPin = GPIO_NUM_32; 
-const int buzzerPin = GPIO_NUM_13;
+const int buzzerPin = GPIO_NUM_12;
 
 #define SOUND_SPEED 0.034
 #define CM_TO_INCH 0.393701
