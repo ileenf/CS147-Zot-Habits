@@ -40,6 +40,9 @@ The ESP32 is connected to the temperature sensor, motion sensor, distance sensor
 ### Web Interface
 The web interface includes features such as displaying graphs, data aggregation, statistics about user habits, and lifestyle recommendations with real time updates from AWS. We used Flask and HTML to render the interface. We used matplotlib to plot graphs for sitting durations, indoor vs outdoor temp, light values, and overall healthiness over time. 
 
+## System Architecture
+<img width="665" alt="System Architecture Picture" src="https://user-images.githubusercontent.com/52259696/171965273-6caa4e1d-49a3-44c5-b1ba-c6300258f849.png">
+
 ## Contributors
 [@ileenf](https://github.com/ileenf)
 
