@@ -43,6 +43,13 @@ The web interface includes features such as displaying graphs, data aggregation,
 ## System Architecture
 <img width="665" alt="System Architecture Picture" src="https://user-images.githubusercontent.com/52259696/171965273-6caa4e1d-49a3-44c5-b1ba-c6300258f849.png">
 
+## Screenshots
+<img width="911" alt="Graphs" src="https://user-images.githubusercontent.com/52259696/171965403-c2a66b07-819d-45b8-9db1-b453a0be3e91.png">
+The sensor data is plotted on graphs and the corresponding aggregations (mean, min, max). At the top we show the overall healthiness percentage.
+
+<img width="985" alt="Statistics" src="https://user-images.githubusercontent.com/52259696/171965512-0f452990-8dd1-4c8f-b013-ec66b3a73c00.png">
+Statistics about user behaviors are displayed along with recommendations for healthier habits/lifestyle.
+
 ## Contributors
 [@ileenf](https://github.com/ileenf)
 
