@@ -22,7 +22,7 @@ Our motivation for this project is to support college students to have good heal
 We retrieved and stored the different data and statistics we sensed from the user. The data aggregated include indoor/outdoor temperature, indoor light levels, sitting durations, and health trends. We also calculated how many times the user didn’t get up for their break, and how many times the user was working in a dark room, which are both components in the overall health percentage calculation.
 
 #### From Weather API
-We used a Weather API called [Open Meteo](https://open-meteo.com/en) to get the outdoor temperature and sunset/sunrise times. We compared the sunset/sunrise times to the user's current time to determine is it's day time or night time outside. We then compared the API data to the sensor data to make conclusions about user behavior.
+We used the [Open Meteo](https://open-meteo.com/en) Weather API to get the outdoor temperature and sunset/sunrise times. We compared the sunset/sunrise times to the user's current time to determine is it's day time or night time outside. We then compared the API data to the sensor data to make conclusions about user behavior.
 
 API Query Parameters:
 
@@ -46,6 +46,7 @@ The web interface includes features such as displaying graphs, data aggregation,
 ## Screenshots
 <img width="911" alt="Graphs" src="https://user-images.githubusercontent.com/52259696/171965403-c2a66b07-819d-45b8-9db1-b453a0be3e91.png">
 The sensor data is plotted on graphs and the corresponding aggregations (mean, min, max). At the top we show the overall healthiness percentage.
+
 
 <img width="985" alt="Statistics" src="https://user-images.githubusercontent.com/52259696/171965512-0f452990-8dd1-4c8f-b013-ec66b3a73c00.png">
 Statistics about user behaviors are displayed along with recommendations for healthier habits/lifestyle.
