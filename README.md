@@ -25,12 +25,12 @@ We retrieved and stored the different data and statistics we sensed from the use
 We used a Weather API called [Open Meteo](https://open-meteo.com/en) to get the outdoor temperature and sunset/sunrise times. We compared the sunset/sunrise times to the user's current time to determine is it's day time or night time outside. We then compared the API data to the sensor data to make conclusions about user behavior.
 
 API Query Parameters:
-    latitude
+    `latitude
     longitude
     temperature_unit
     current_weather
     daily
-    timezone
+    timezone`
 
 ### AWS Cloud Web Server
 The ESP32 is connected to the temperature sensor, motion sensor, distance sensor, buzzer, and photoresistor. The temperature sensor and photoresistor collect data every minute, while the motion and distance sensor sense movement more frequently, every 3 seconds. The buzzer sounds to signal the beginning and end of breaks. The ESP32 uses WiFi communication protocol in order to send data to the AWS Flask server, which stores the sensor data locally in text files and displays graphs on a web interface. We made POST requests to send sensor collected data (light, temperature, sitting statistics, etc) to the AWS server. 
